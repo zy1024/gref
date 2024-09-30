@@ -1,11 +1,12 @@
 # gref
-
 gref is a utility library for performing reflection operations in Go. It provides two main functionalities: generating update fields and copying struct fields.
 
 ### Installation
 ```
 go get github.com/zy1024/gref
 ```
+
+### Document Language : **[English](README.md), [中文](README_CN.md).**
 
 ## Features
 

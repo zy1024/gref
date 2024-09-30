@@ -1,10 +1,13 @@
 # gref
 gref 是一个用于在 Go 中进行反射操作的实用工具库。它提供了两个主要功能：生成更新字段和复制结构体字段。
 
+
 ### 安装
 ```
 go get github.com/zy1024/gref
 ```
+
+### 文档语言 : **[English](README.md), [中文](README_CN.md).**
 
 ## 功能
 
