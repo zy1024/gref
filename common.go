@@ -6,11 +6,10 @@ import (
 	"reflect"
 )
 
-// CopyFields copies fields from src to dst.
+// CopyStructFields copies fields from src to dst.
 // It only copies fields with the same name and type.
 // Notice : src and dst must be pointers to struct.
-func CopyFields(src, dst interface{}) error {
-
+func CopyStructFields(src, dst interface{}) error {
 	// check if src and dst are not nil
 	if src == nil {
 		return errors.New("CopyFields: src is nil")
@@ -35,14 +34,127 @@ func CopyFields(src, dst interface{}) error {
 
 		// get the field of dst with the same name of src
 		dstField := dstStruct.FieldByName(srcFieldName)
-		// check if the dst field exists, the dst field can be set and the dst field type is the same as the src field type
-		if dstField.IsValid() && dstField.CanSet() && dstField.Type() == srcField.Type() {
-			// check if the dst field is zero value, if so, set it to the src field
-			if utils.IsZero(dstField) {
+		// check if the dst field exists and can be set
+		if dstField.IsValid() && dstField.CanSet() {
+			// check if the dst field is not zero value, if so, skip it
+			if !utils.IsZero(dstField) {
+				continue
+			}
+
+			// base on the type of dst field, copy the value from src to dst
+			switch {
+			case dstField.Type() == srcField.Type():
+				// check if the dst field is zero value, if so, set it to the src field
 				dstField.Set(srcField)
+
+			case dstField.Kind() == reflect.Slice && srcField.Kind() == reflect.Slice:
+				// Handle slice fields
+				switch {
+				case dstField.Type().Elem() == srcField.Type().Elem():
+					dstField.Set(srcField)
+
+				case dstField.Type().Elem().Kind() == reflect.Struct && srcField.Type().Elem().Kind() == reflect.Struct:
+					// Handle nested struct slices
+					for j := 0; j < srcField.Len(); j++ {
+						srcElem := srcField.Index(j)
+						dstElem := reflect.New(dstField.Type().Elem()).Elem()
+						if err := CopyStructFields(srcElem.Addr().Interface(), dstElem.Addr().Interface()); err != nil {
+							return err
+						}
+						dstField.Set(reflect.Append(dstField, dstElem))
+					}
+
+				case dstField.Type().Elem().Kind() == reflect.Ptr && srcField.Type().Elem().Kind() == reflect.Ptr:
+					// Handle nested pointer slices
+					for j := 0; j < srcField.Len(); j++ {
+						srcElem := srcField.Index(j)
+						if srcElem.IsNil() {
+							dstField.Set(reflect.Append(dstField, reflect.Zero(dstField.Type().Elem())))
+						} else {
+							dstElem := reflect.New(dstField.Type().Elem().Elem()).Elem()
+							if err := CopyStructFields(srcElem.Elem().Addr().Interface(), dstElem.Addr().Interface()); err != nil {
+								return err
+							}
+							dstField.Set(reflect.Append(dstField, dstElem.Addr()))
+						}
+					}
+
+				default:
+					// Handle basic type slices
+					if err := CopyBasicValue(srcField.Addr().Interface(), dstField.Addr().Interface()); err != nil {
+						return err
+					}
+				}
+
+			case dstField.Kind() == reflect.Struct && srcField.Kind() == reflect.Struct:
+				// Handle nested struct fields
+				if err := CopyStructFields(srcField.Addr().Interface(), dstField.Addr().Interface()); err != nil {
+					return err
+				}
+
+			case dstField.Kind() == reflect.Ptr && srcField.Kind() == reflect.Ptr:
+				// Handle pointer fields
+				switch {
+				case dstField.Type().Elem() == srcField.Type().Elem():
+					dstField.Set(srcField)
+
+				case dstField.Type().Elem().Kind() == reflect.Struct && srcField.Type().Elem().Kind() == reflect.Struct:
+					// Handle nested struct pointers
+					if srcField.IsNil() {
+						dstField.Set(reflect.Zero(dstField.Type()))
+					} else {
+						dstElem := reflect.New(dstField.Type().Elem()).Elem()
+						if err := CopyStructFields(srcField.Elem().Addr().Interface(), dstElem.Addr().Interface()); err != nil {
+							return err
+						}
+						dstField.Set(dstElem.Addr())
+					}
+
+				default:
+					// Handle basic type pointers
+					if err := CopyBasicValue(srcField.Elem().Addr().Interface(), dstField.Elem().Addr().Interface()); err != nil {
+						return err
+					}
+				}
+
+			default:
+				// Handle basic type fields
+				if err := CopyBasicValue(srcField.Addr().Interface(), dstField.Addr().Interface()); err != nil {
+					return err
+				}
 			}
 		}
 	}
 
 	return nil
+}
+
+// CopyBasicValue copies the value from src to dst.
+// It supports conversion between different basic types.
+// Notice: src and dst must be pointers to basic types.
+func CopyBasicValue(src, dst interface{}) error {
+	// check if src and dst are not nil
+	if src == nil {
+		return errors.New("CopyValue: src is nil")
+	}
+	if dst == nil {
+		return errors.New("CopyValue: dst is nil")
+	}
+
+	// check if src and dst are pointers
+	if err := utils.IsPointer(src, dst); err != nil {
+		return errors.New("CopyValue: src and dst must be pointers")
+	}
+
+	// check if src and dst are pointers
+	srcElem := reflect.ValueOf(src)
+	dstElem := reflect.ValueOf(dst)
+
+	// check if src and dst are basic types
+	if !utils.IsBasicType(srcElem.Kind()) || !utils.IsBasicType(dstElem.Kind()) {
+		return errors.New("CopyValue: src and dst must be basic types")
+	}
+
+	// handle basic types
+	return utils.CopyBasicValue(srcElem, dstElem)
 }
