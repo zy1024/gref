@@ -26,3 +26,15 @@ func CheckPointerToStruct(params ...interface{}) error {
 	}
 	return nil
 }
+
+// IsPointer checks if the given parameters are pointers.
+func IsPointer(params ...interface{}) error {
+	for _, param := range params {
+		pointer := reflect.ValueOf(param)
+		// check if the parameter is a pointer
+		if pointer.Kind() != reflect.Ptr {
+			return errors.New("CheckPointers: parameter must be a pointer")
+		}
+	}
+	return nil
+}
