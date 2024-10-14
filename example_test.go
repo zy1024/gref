@@ -78,20 +78,16 @@ func TestCopyStructFields(t *testing.T) {
 
 func TestCopyValue(t *testing.T) {
 	var a = 1
-	var b string
-	var c = []int32{1, 2, 3}
-	var d []string
+	var b = "22.194523"
+	var e float32
 
 	err := CopyBasicValue(&a, &b)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = CopyBasicValue(&c, &d)
-	if err != nil {
-		t.Error(err)
-	}
+	err = CopyBasicValue(&b, &e)
 
 	fmt.Println(b, reflect.TypeOf(b))
-	fmt.Println(d, reflect.TypeOf(d))
+	fmt.Println(e, reflect.TypeOf(e))
 }

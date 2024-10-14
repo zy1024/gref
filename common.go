@@ -148,12 +148,15 @@ func CopyBasicValue(src, dst interface{}) error {
 	}
 
 	// check if src and dst are pointers
-	srcElem := reflect.ValueOf(src)
-	dstElem := reflect.ValueOf(dst)
+	srcElem := reflect.ValueOf(src).Elem()
+	dstElem := reflect.ValueOf(dst).Elem()
 
 	// check if src and dst are basic types
-	if !utils.IsBasicType(srcElem.Kind()) || !utils.IsBasicType(dstElem.Kind()) {
-		return errors.New("CopyValue: src and dst must be basic types")
+	if !utils.IsBasicType(srcElem.Kind()) {
+		return errors.New("CopyValue: src must be basic type")
+	}
+	if !utils.IsBasicType(dstElem.Kind()) {
+		return errors.New("CopyValue: dst must be basic types")
 	}
 
 	// handle basic types

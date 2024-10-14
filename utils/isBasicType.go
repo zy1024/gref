@@ -10,7 +10,7 @@ func IsBasicType(kind reflect.Kind) bool {
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
 		reflect.Float32, reflect.Float64,
 		reflect.Complex64, reflect.Complex128,
-		reflect.String, reflect.Slice:
+		reflect.String:
 		return true
 	default:
 		return false
