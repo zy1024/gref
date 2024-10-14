@@ -2,6 +2,7 @@ package gref
 
 import (
 	"errors"
+	"fmt"
 	"github.com/zy1024/gref/utils"
 	"reflect"
 )
@@ -12,10 +13,10 @@ import (
 func CopyStructFields(src, dst interface{}) error {
 	// check if src and dst are not nil
 	if src == nil {
-		return errors.New("CopyFields: src is nil")
+		return errors.New("CopyStructFields: src is nil")
 	}
 	if dst == nil {
-		return errors.New("CopyFields: dst is nil")
+		return errors.New("CopyStructFields: dst is nil")
 	}
 
 	// check if src and dst are pointers to struct
@@ -59,7 +60,7 @@ func CopyStructFields(src, dst interface{}) error {
 						srcElem := srcField.Index(j)
 						dstElem := reflect.New(dstField.Type().Elem()).Elem()
 						if err := CopyStructFields(srcElem.Addr().Interface(), dstElem.Addr().Interface()); err != nil {
-							return err
+							return fmt.Errorf("CopyStructFields: error copying basic type field %s: %w", srcFieldName, err)
 						}
 						dstField.Set(reflect.Append(dstField, dstElem))
 					}
@@ -73,7 +74,7 @@ func CopyStructFields(src, dst interface{}) error {
 						} else {
 							dstElem := reflect.New(dstField.Type().Elem().Elem()).Elem()
 							if err := CopyStructFields(srcElem.Elem().Addr().Interface(), dstElem.Addr().Interface()); err != nil {
-								return err
+								return fmt.Errorf("CopyStructFields: error copying basic type field %s: %w", srcFieldName, err)
 							}
 							dstField.Set(reflect.Append(dstField, dstElem.Addr()))
 						}
@@ -82,14 +83,14 @@ func CopyStructFields(src, dst interface{}) error {
 				default:
 					// Handle basic type slices
 					if err := CopyBasicValue(srcField.Addr().Interface(), dstField.Addr().Interface()); err != nil {
-						return err
+						return fmt.Errorf("CopyStructFields: error copying basic type field %s: %w", srcFieldName, err)
 					}
 				}
 
 			case dstField.Kind() == reflect.Struct && srcField.Kind() == reflect.Struct:
 				// Handle nested struct fields
 				if err := CopyStructFields(srcField.Addr().Interface(), dstField.Addr().Interface()); err != nil {
-					return err
+					return fmt.Errorf("CopyStructFields: error copying basic type field %s: %w", srcFieldName, err)
 				}
 
 			case dstField.Kind() == reflect.Ptr && srcField.Kind() == reflect.Ptr:
@@ -105,7 +106,7 @@ func CopyStructFields(src, dst interface{}) error {
 					} else {
 						dstElem := reflect.New(dstField.Type().Elem()).Elem()
 						if err := CopyStructFields(srcField.Elem().Addr().Interface(), dstElem.Addr().Interface()); err != nil {
-							return err
+							return fmt.Errorf("CopyStructFields: error copying basic type field %s: %w", srcFieldName, err)
 						}
 						dstField.Set(dstElem.Addr())
 					}
@@ -113,14 +114,14 @@ func CopyStructFields(src, dst interface{}) error {
 				default:
 					// Handle basic type pointers
 					if err := CopyBasicValue(srcField.Elem().Addr().Interface(), dstField.Elem().Addr().Interface()); err != nil {
-						return err
+						return fmt.Errorf("CopyStructFields: error copying basic type field %s: %w", srcFieldName, err)
 					}
 				}
 
 			default:
 				// Handle basic type fields
 				if err := CopyBasicValue(srcField.Addr().Interface(), dstField.Addr().Interface()); err != nil {
-					return err
+					return fmt.Errorf("CopyStructFields: error copying basic type field %s: %w", srcFieldName, err)
 				}
 			}
 		}

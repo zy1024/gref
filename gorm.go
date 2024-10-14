@@ -20,14 +20,14 @@ func GenerateUpdateFields(req interface{}) (map[string]interface{}, error) {
 
 	// check if req is a pointer
 	if reqValue.Kind() != reflect.Ptr {
-		return nil, errors.New("CopyFields : req must be pointers")
+		return nil, errors.New("GenerateUpdateFields : req must be pointers")
 	}
 
 	reqValue = reqValue.Elem()
 
 	// check if the value is a struct
 	if reqValue.Kind() != reflect.Struct {
-		return nil, errors.New("CopyFields : req must be pointers to structs")
+		return nil, errors.New("GenerateUpdateFields : req must be pointers to structs")
 	}
 
 	v := reflect.ValueOf(req).Elem()
