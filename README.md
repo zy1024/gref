@@ -1,6 +1,5 @@
 # gref
-Gref is a utility library for data assignment using reflection in Golang. Main function: Assignment between two parameters, such as two different structs.
-
+gref is a utility library in Golang that utilizes reflection for data assignment. The main function is to assign values between two parameters, such as two different structs.
 
 ### Installation
 ```
@@ -11,19 +10,14 @@ go get github.com/zy1024/gref
 
 ## Features
 
-### 1. Copy Struct Fields
-The `CopyStructFields` function copies fields from the source struct to the destination struct, commonly used to return specified parameters. It only copies fields from src to dst if dst is empty and has the same name as src.
-Notice: This function does not handle nested structs and only processes struct pointers.
-
+### 1. Copy
+The `Copy(src,dst)` function requires two pointers, such as pointers to structs or slices. It will use reflection to assign the value of src to dst. The assignment of structs is based on matching field names, and only non-empty fields in dst will be assigned.
 ### Example
-The sample code can be seen in the `TestCopyStructFields` method in `example_test.go`.
+The sample code can be seen in the `TestCopy` method in `example_test.go`.
 
 ## Version
-### 1.1.0
-1.The name of the `CopyFields` method is changed to `CopyStructFields`. In addition, the support for the assignment of the same field name and different data types in two different structures is added. Includes array, struct, struct pointer, struct array pointer.
+### 1.3.0
+Official release, supporting assignment operations for structs, pointers, slices, and basic data types.
 
-2.The newly added `CopyBasicValue` method is used to assign values between different underlying data types.
-
-
-## Next development (if there is a need, you can mention it in the issue)
-1. Increase the assignment between different types of slices.
+### Next Development Steps
+1. Add support for other types, such as channels.

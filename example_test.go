@@ -3,7 +3,6 @@ package gref
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 )
 
@@ -38,18 +37,18 @@ type Dst struct {
 }
 
 // example
-func TestCopyStructFields(t *testing.T) {
+func TestCopy(t *testing.T) {
 	src := &Src{
-		Name:     "A",
-		Age:      "12",
-		Password: "123456",
-		Friends:  make([]PersonContainAddress, 0),
-		Parent: PersonContainAddress{
+		Name:     "A",                             // same type and name as dst , will be copied
+		Age:      "12",                            // same name but different type, will be converted to dst type
+		Password: "123456",                        // dst has no Password field, will be ignored
+		Friends:  make([]PersonContainAddress, 0), // dst has same Friends field but different type, and fewer fields, the same fields will be copied and converted
+		Parent: PersonContainAddress{ // same name but different type, will be converted to dst type
 			Name: "parent-A",
 			Age:  32,
 			Addr: "address-A",
 		},
-		Brother: &PersonContainAddress{
+		Brother: &PersonContainAddress{ // dst has data, will be ignored
 			Name: "brother-A",
 			Age:  13,
 			Addr: "address-A",
@@ -60,8 +59,14 @@ func TestCopyStructFields(t *testing.T) {
 	src.Sister = append(src.Sister, &PersonContainAddress{Name: "sister-A1", Age: 15, Addr: "address-E"})
 	src.Sister = append(src.Sister, &PersonContainAddress{Name: "sister-A2", Age: 16, Addr: "address-D"})
 
-	dst := &Dst{}
-	err := CopyStructFields(src, dst)
+	dst := &Dst{
+		Brother: &Person{
+			Name: "",
+			Age:  10,
+		},
+	}
+
+	err := Copy(src, dst)
 	if err != nil {
 		t.Error(err)
 		return
@@ -74,20 +79,4 @@ func TestCopyStructFields(t *testing.T) {
 	for _, person := range dst.Sister {
 		fmt.Println(person)
 	}
-}
-
-func TestCopyValue(t *testing.T) {
-	var a = 1
-	var b = "22.194523"
-	var e float32
-
-	err := CopyBasicValue(&a, &b)
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = CopyBasicValue(&b, &e)
-
-	fmt.Println(b, reflect.TypeOf(b))
-	fmt.Println(e, reflect.TypeOf(e))
 }
