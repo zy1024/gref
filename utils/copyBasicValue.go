@@ -109,23 +109,3 @@ func CopyBasicValue(src, dst reflect.Value) error {
 
 	return nil
 }
-
-// CopySliceValue copies a slice value from src to dst, converting types if necessary.
-func CopySliceValue(src, dst reflect.Value) error {
-	// Expand dst if it is shorter than src
-	if dst.Len() != src.Len() {
-		newDst := reflect.MakeSlice(dst.Type(), src.Len(), src.Len())
-		reflect.Copy(newDst, dst)
-		dst.Set(newDst)
-	}
-
-	for i := 0; i < src.Len(); i++ {
-		srcElem := src.Index(i)
-		dstElem := dst.Index(i)
-		if err := CopyBasicValue(srcElem, dstElem); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
