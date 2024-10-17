@@ -25,6 +25,7 @@ type Src struct {
 	Parent   PersonContainAddress
 	Brother  *PersonContainAddress
 	Sister   []*PersonContainAddress
+	Teacher  []Person
 }
 
 type Dst struct {
@@ -34,6 +35,7 @@ type Dst struct {
 	Parent  Person
 	Brother *Person
 	Sister  []*Person
+	Teacher []int
 }
 
 // example
@@ -58,6 +60,7 @@ func TestCopy(t *testing.T) {
 	src.Friends = append(src.Friends, PersonContainAddress{Name: "C", Age: 14, Addr: "address-C"})
 	src.Sister = append(src.Sister, &PersonContainAddress{Name: "sister-A1", Age: 15, Addr: "address-E"})
 	src.Sister = append(src.Sister, &PersonContainAddress{Name: "sister-A2", Age: 16, Addr: "address-D"})
+	src.Teacher = append(src.Teacher, Person{Name: "teacher-A", Age: 30})
 
 	dst := &Dst{
 		Brother: &Person{
@@ -79,4 +82,5 @@ func TestCopy(t *testing.T) {
 	for _, person := range dst.Sister {
 		fmt.Println(person)
 	}
+	fmt.Println(len(dst.Teacher))
 }

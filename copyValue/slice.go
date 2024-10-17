@@ -5,16 +5,21 @@ import (
 	"reflect"
 )
 
-func SliceValue(srcElem, dstElem reflect.Value) error {
+func SliceValue(srcSlice, dstSlice reflect.Value) error {
 
-	// set dstElem to a new slice
-	newDst := reflect.MakeSlice(dstElem.Type(), srcElem.Len(), srcElem.Len())
-	dstElem.Set(newDst)
+	// Check whether src and dst can be assigned to each other
+	if !utils.CanBeCopy(srcSlice.Type().Elem(), dstSlice.Type().Elem()) {
+		return nil
+	}
+
+	// set dstSlice to a new slice
+	newDst := reflect.MakeSlice(dstSlice.Type(), srcSlice.Len(), srcSlice.Len())
+	dstSlice.Set(newDst)
 
 	// copy each element
-	for i := 0; i < srcElem.Len(); i++ {
-		srcElemData := srcElem.Index(i)
-		dstElemData := dstElem.Index(i)
+	for i := 0; i < srcSlice.Len(); i++ {
+		srcElemData := srcSlice.Index(i)
+		dstElemData := dstSlice.Index(i)
 
 		switch {
 		case utils.IsBasicType(srcElemData.Kind()) && utils.IsBasicType(srcElemData.Kind()):
