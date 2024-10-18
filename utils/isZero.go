@@ -17,10 +17,15 @@ func IsZero(v reflect.Value) bool {
 		return v.Complex() == 0
 	case reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String:
 		return v.Len() == 0
-	case reflect.Interface, reflect.Ptr, reflect.Func, reflect.UnsafePointer:
+	case reflect.Interface, reflect.Func, reflect.UnsafePointer:
 		return v.IsNil()
 	case reflect.Struct:
 		return reflect.DeepEqual(v.Interface(), reflect.Zero(v.Type()).Interface())
+	case reflect.Ptr:
+		if v.IsNil() {
+			return true
+		}
+		return IsZero(v.Elem())
 	default:
 		return false
 	}
