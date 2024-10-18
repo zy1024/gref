@@ -4,19 +4,28 @@ package gref
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/zy1024/gref/utils"
+	"reflect"
 	"testing"
 	"time"
 )
 
 type PersonContainAddress struct {
-	Name string
-	Age  int
-	Addr string
+	Name     string
+	Age      int
+	Addr     string
+	HomeTown HomeTown
 }
 
 type Person struct {
-	Name string
-	Age  int
+	Name     string
+	Age      int
+	HomeTown HomeTown
+}
+
+type HomeTown struct {
+	Name    string
+	Country string
 }
 
 type Src struct {
@@ -50,6 +59,10 @@ func TestCopy(t *testing.T) {
 			Name: "parent-A",
 			Age:  32,
 			Addr: "address-A1",
+			HomeTown: HomeTown{
+				Name:    "HomeTown-A",
+				Country: "China",
+			},
 		},
 		Brother: &PersonContainAddress{
 			Name: "brother-A",
@@ -65,10 +78,13 @@ func TestCopy(t *testing.T) {
 
 	dst := &Dst{
 		Brother: &Person{ // dst has data, src data will be ignored
-			Name: "Ignore",
-			Age:  10,
+			Name:     "Ignore",
+			Age:      0,
+			HomeTown: HomeTown{Country: "EN"},
 		},
 	}
+
+	fmt.Println("isZero:", utils.IsZero(reflect.ValueOf(dst)))
 
 	var averageTime time.Duration
 	var totalTime time.Duration
@@ -94,12 +110,18 @@ func TestCopy(t *testing.T) {
 
 	fmt.Println(src)
 	fmt.Println("---------------------------------------")
-	fmt.Println(dst)
-	fmt.Println(dst.Brother)
-	for _, person := range dst.Sister {
-		fmt.Println(person)
+	fmt.Println("dst:", dst, reflect.TypeOf(dst))
+	fmt.Println("dst.Name:", dst.Name, reflect.TypeOf(dst.Name))
+	fmt.Println("dst.Age:", dst.Age, reflect.TypeOf(dst.Age))
+	fmt.Println("dst.Friends:", dst.Friends, reflect.TypeOf(dst.Friends))
+	fmt.Println("dst.Parent:", dst.Parent, reflect.TypeOf(dst.Parent))
+	fmt.Println("dst.Parent.HomeTown:", dst.Parent.HomeTown, reflect.TypeOf(dst.Parent.HomeTown))
+	fmt.Println("dst.Brother:", dst.Brother, reflect.TypeOf(dst.Brother))
+	fmt.Println("dst.Sister:", dst.Sister, reflect.TypeOf(dst.Sister))
+	for i, sister := range dst.Sister {
+		fmt.Println("dst.Sister[", i, "]:", sister, reflect.TypeOf(sister))
 	}
-	fmt.Println(len(dst.Teacher))
+	fmt.Println("dst.Teacher:", dst.Teacher, reflect.TypeOf(dst.Teacher))
 }
 
 func TestCopyAndMarshalEfficiency(t *testing.T) {

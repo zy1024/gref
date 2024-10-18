@@ -2,12 +2,18 @@ package copyValue
 
 import (
 	"fmt"
+	"github.com/zy1024/gref/utils"
 	"reflect"
 	"strconv"
 )
 
 // BasicValue copies a basic value from src to dst, converting types if necessary.
 func BasicValue(src, dst reflect.Value) error {
+	// if src is zero value, not need to copy
+	if utils.IsZero(src) {
+		return nil
+	}
+
 	switch src.Kind() {
 	case reflect.Bool:
 		switch dst.Kind() {

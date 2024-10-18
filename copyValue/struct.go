@@ -7,7 +7,7 @@ import (
 
 func StructValue(srcStruct, dstStruct reflect.Value) error {
 
-	// check if the src struct is zero value
+	// if the src struct is zero value, no need to copy
 	if utils.IsZero(srcStruct) {
 		return nil
 	}
@@ -23,7 +23,7 @@ func StructValue(srcStruct, dstStruct reflect.Value) error {
 		if srcField.IsValid() && dstField.CanSet() {
 
 			// check if the dst field is zero value, if so, set it to the src field
-			if !utils.IsZero(dstField) && dstField.Kind() != reflect.Ptr {
+			if !utils.IsZero(dstField) {
 				continue
 			}
 
@@ -47,16 +47,13 @@ func StructValue(srcStruct, dstStruct reflect.Value) error {
 				}
 
 			case dstField.Kind() == reflect.Ptr && srcField.Kind() == reflect.Ptr:
-				if !utils.IsZero(dstField.Elem()) {
-					continue
-				}
 				// Handle pointer fields
 				err := PointerValue(srcField, dstField)
 				if err != nil {
 					return err
 				}
 
-			case utils.IsBasicType(srcField.Kind()) && utils.IsBasicType(dstField.Kind()):
+			case utils.IsBasicType(srcField.Kind(), dstField.Kind()):
 				// Handle basic type slices
 				err := BasicValue(srcField, dstField)
 				if err != nil {

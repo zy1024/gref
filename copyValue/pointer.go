@@ -22,6 +22,9 @@ func PointerValue(srcPtr, dstPtr reflect.Value) error {
 	dstElem := dstPtr.Elem()
 
 	switch {
+	case srcElem.Type() == dstElem.Type():
+		dstElem.Set(srcElem)
+
 	case srcElem.Kind() == reflect.Struct && dstElem.Kind() == reflect.Struct:
 		err := StructValue(srcElem, dstElem)
 		if err != nil {
@@ -40,7 +43,7 @@ func PointerValue(srcPtr, dstPtr reflect.Value) error {
 			return err
 		}
 
-	case utils.IsBasicType(srcElem.Kind()) && utils.IsBasicType(dstElem.Kind()):
+	case utils.IsBasicType(srcElem.Kind(), dstElem.Kind()):
 		err := BasicValue(srcElem, dstElem)
 		if err != nil {
 			return err
