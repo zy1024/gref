@@ -2,6 +2,7 @@
 package gref
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -69,34 +70,27 @@ func TestCopy(t *testing.T) {
 		},
 	}
 
-	startTime := time.Now()
+	var averageTime time.Duration
+	var totalTime time.Duration
 
-	// Operating efficiency test
-	//for i := 0; i < 1; i++ {
-	//	srcBytes, err := json.Marshal(src)
-	//	if err != nil {
-	//		t.Error(err)
-	//	}
-	//	err = json.Unmarshal(srcBytes, dst)
-	//	if err != nil {
-	//		t.Error(err)
-	//	}
-	//	err := Copy(src, dst)
-	//	if err != nil {
-	//		t.Error(err)
-	//		return
-	//	}
-	//}
+	for i := 0; i < 1000; i++ {
 
-	err := Copy(src, dst)
-	if err != nil {
-		t.Error(err)
-		return
+		startTime := time.Now()
+
+		// Operating efficiency test
+		err := Copy(src, dst)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		endTime := time.Now()
+		totalTime += endTime.Sub(startTime)
+
 	}
-
-	endTime := time.Now()
-
-	fmt.Println("time:", endTime.Sub(startTime))
+	averageTime = totalTime / 1000
+	fmt.Println("totalTime:", totalTime)
+	fmt.Println("averageTime:", averageTime)
 
 	fmt.Println(src)
 	fmt.Println("---------------------------------------")
@@ -106,4 +100,38 @@ func TestCopy(t *testing.T) {
 		fmt.Println(person)
 	}
 	fmt.Println(len(dst.Teacher))
+}
+
+func TestCopyAndMarshalEfficiency(t *testing.T) {
+	a := PersonContainAddress{
+		Name: "A",
+		Age:  18,
+		Addr: "addr-A",
+	}
+	b := Person{}
+
+	var averageTime time.Duration
+	var totalTime time.Duration
+	for i := 0; i < 1000; i++ {
+		startTime := time.Now()
+		_ = Copy(&a, &b)
+		endTime := time.Now()
+		totalTime += endTime.Sub(startTime)
+	}
+	averageTime = totalTime / 1000
+	fmt.Println("Copy Spend total time:", totalTime)
+	fmt.Println("Copy Spend average time:", averageTime)
+
+	averageTime = 0
+	totalTime = 0
+	for i := 0; i < 1000; i++ {
+		startTime := time.Now()
+		aBytes, _ := json.Marshal(&a)
+		_ = json.Unmarshal(aBytes, &b)
+		endTime := time.Now()
+		totalTime += endTime.Sub(startTime)
+	}
+	averageTime = totalTime / 1000
+	fmt.Println("json Marshal Spend total time:", totalTime)
+	fmt.Println("json Marshal Spend average time:", averageTime)
 }

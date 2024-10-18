@@ -7,14 +7,21 @@ import (
 
 func StructValue(srcStruct, dstStruct reflect.Value) error {
 
-	for i := 0; i < srcStruct.NumField(); i++ {
-		srcField := srcStruct.Field(i)
-		srcFieldName := srcStruct.Type().Field(i).Name
+	// check if the src struct is zero value
+	if utils.IsZero(srcStruct) {
+		return nil
+	}
 
-		// get the field of dst with the same name of src
-		dstField := dstStruct.FieldByName(srcFieldName)
-		// check if the dst field exists and can be set
-		if dstField.IsValid() && dstField.CanSet() {
+	// copy the value of src struct to dst struct
+	for i := 0; i < dstStruct.NumField(); i++ {
+		dstField := dstStruct.Field(i)
+		dstFieldName := dstStruct.Type().Field(i).Name
+
+		// get the field of src with the same name of dst
+		srcField := srcStruct.FieldByName(dstFieldName)
+		// check if the src field exists and can be set
+		if srcField.IsValid() && dstField.CanSet() {
+
 			// check if the dst field is zero value, if so, set it to the src field
 			if !utils.IsZero(dstField) && dstField.Kind() != reflect.Ptr {
 				continue
